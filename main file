@@ -1,1 +1,404 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Home Layout Generator</title>
+<style>
+ body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  background: #f9f9f9;
+  color: #222;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+label {
+  margin-right: 10px;
+  font-weight: 600;
+}
+
+input[type="number"] {
+  width: 80px;
+  margin-right: 20px;
+  padding: 6px 8px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  transition: border-color 0.3s ease;
+}
+
+input[type="number"]:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+button {
+  padding: 8px 16px;
+  font-size: 1rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+#layouts {
+  margin-top: 30px;
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 100%;
+  overflow-x: auto; /* Horizontal scroll on small screens */
+  padding-bottom: 10px;
+}
+
+/* Each layout box */
+.layout {
+  border: 2px solid #333;
+  position: relative;
+  width: 100%;
+  max-width: 350px;
+  aspect-ratio: 1 / 1; /* Keep square shape */
+  box-sizing: border-box;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  flex-shrink: 0; /* Prevent shrinking in flex container */
+}
+
+/* Room boxes */
+.room {
+  position: absolute;
+  border: 1.5px solid #007bff;
+  box-sizing: border-box;
+  background: rgba(0, 123, 255, 0.15);
+  font-size: 12px;
+  padding: 4px 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border-radius: 3px;
+  user-select: none;
+  cursor: default;
+  transition: background-color 0.3s ease;
+}
+.room:hover {
+  background: rgba(0, 123, 255, 0.35);
+}
+
+.room .name {
+  font-weight: bold;
+  margin-bottom: 4px;
+  font-size: 13px;
+  color: #004a99;
+}
+
+.room .size {
+  font-size: 11px;
+  color: #555;
+}
+
+/* Special style for Garden area */
+.room.garden {
+  background: rgba(0, 200, 0, 0.15);
+  border: 1.5px dashed green;
+  color: green;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  input[type="number"] {
+    width: 60px;
+    margin-right: 10px;
+    font-size: 0.9rem;
+  }
+  button {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+  .room {
+    font-size: 11px;
+    padding: 3px 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    margin: 10px;
+  }
+  label {
+    display: block;
+    margin-bottom: 10px;
+  }
+  input[type="number"] {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+  button {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+  }
+  #layouts {
+    gap: 20px;
+    padding-bottom: 20px;
+  }
+  .layout {
+    max-width: 100%;
+  }
+}
+.door {
+  position: absolute;
+  background-color: #654321; /* brown door color */
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+/* Door sizes and positioning */
+
+.door.top, .door.bottom {
+  width: 8%;
+  height: 4%;
+  left: 46%;
+}
+
+.door.left, .door.right {
+  width: 4%;
+  height: 8%;
+  top: 46%;
+}
+
+/* Positioning for each side */
+.door.top {
+  top: 0;
+}
+
+.door.bottom {
+  bottom: 0;
+}
+
+.door.left {
+  left: 0;
+}
+
+.door.right {
+  right: 0;
+}
+</style>
+</head>
+<body>
+
+<h2>Home Layout Generator</h2>
+
+<div>
+  <label>Land Length (ft): <input type="number" id="length" min="10" value="40" /></label>
+  <label>Land Width (ft): <input type="number" id="width" min="10" value="30" /></label>
+  <button onclick="generateLayouts()">Generate Layouts</button>
+</div>
+
+<p>Total Area: <span id="areaDisplay">0</span> sq.ft</p>
+
+<div id="layouts"></div>
+
+<script>
+  function generateLayouts() {
+    const length = Number(document.getElementById('length').value);
+    const width = Number(document.getElementById('width').value);
+    const area = length * width;
+    document.getElementById('areaDisplay').textContent = area;
+
+    const layoutsContainer = document.getElementById('layouts');
+    layoutsContainer.innerHTML = ''; // Clear old layouts
+
+    // Layout 1: 3 Rooms - Living, Bedroom, Kitchen + Bathroom
+    layoutsContainer.appendChild(createLayout1(length, width));
+
+    // Layout 2: 4 Rooms - Living, 2 Bedrooms, Kitchen + Bathroom
+    layoutsContainer.appendChild(createLayout2(length, width));
+
+    // Layout 3: 5 Rooms - Living, 3 Bedrooms, Kitchen + 2 Bathrooms
+    if(area > 1200) {
+      layoutsContainer.appendChild(createLayout3(length, width));
+    }
+
+    // Layout 4: Open plan living with 2 bedrooms and 1 bathroom, plus a garage
+    layoutsContainer.appendChild(createLayout4(length, width));
+
+    // Layout 5: Square shape with central corridor, 3 bedrooms, 2 bathrooms
+    layoutsContainer.appendChild(createLayout5(length, width));
+
+    // Layout 6: L-shaped house with garden area, 2 bedrooms, 1 bathroom, kitchen & living separate
+    layoutsContainer.appendChild(createLayout6(length, width));
+  }
+
+  // Layout 1: Living (50%), Bedroom (30%), Kitchen (15%), Bathroom (5%)
+  function createLayout1(length, width) {
+    const container = document.createElement('div');
+    container.className = 'layout';
+
+    addRoom(container, 0, 0, length * 0.5, width, 'Living Room', 'right');
+    addRoom(container, length * 0.5, 0, length * 0.5, width * 0.6, 'Bedroom', 'bottom');
+    addRoom(container, length * 0.5, width * 0.6, length * 0.5, width * 0.3, 'Kitchen', 'left');
+    addRoom(container, length * 0.5, width * 0.9, length * 0.5, width * 0.1, 'Bathroom', 'top');
+
+    scaleRooms(container, length, width);
+    return container;
+  }
+
+  // Layout 2: Living (40%), Bedroom 1 (20%), Bedroom 2 (20%), Kitchen (15%), Bathroom (5%)
+  function createLayout2(length, width) {
+    const container = document.createElement('div');
+    container.className = 'layout';
+
+    addRoom(container, 0, 0, length * 0.4, width, 'Living Room', 'right');
+    addRoom(container, length * 0.4, 0, length * 0.6, width * 0.5, 'Bedroom 1', 'left');
+    addRoom(container, length * 0.4, width * 0.5, length * 0.6, width * 0.5, 'Bedroom 2', 'left');
+    addRoom(container, length * 0.8, 0, length * 0.2, width * 0.3, 'Kitchen', 'bottom');
+    addRoom(container, length * 0.8, width * 0.3, length * 0.2, width * 0.2, 'Bathroom', 'top');
+
+    scaleRooms(container, length, width);
+    return container;
+  }
+
+  // Layout 3: Living (30%), Bedroom 1 (20%), Bedroom 2 (20%), Bedroom 3 (15%), Kitchen (10%), Bathrooms (5% + 5%)
+  function createLayout3(length, width) {
+    const container = document.createElement('div');
+    container.className = 'layout';
+
+    addRoom(container, 0, width * 0.5, length * 0.5, width * 0.5, 'Living Room', 'right');
+    addRoom(container, 0, 0, length * 0.5, width * 0.5, 'Bedroom 1', 'bottom');
+    addRoom(container, length * 0.5, 0, length * 0.5, width * 0.4, 'Bedroom 2', 'left');
+    addRoom(container, length * 0.5, width * 0.4, length * 0.5, width * 0.3, 'Bedroom 3', 'left');
+    addRoom(container, length * 0.5, width * 0.7, length * 0.3, width * 0.3, 'Kitchen', 'top');
+    addRoom(container, length * 0.8, 0, length * 0.2, width * 0.2, 'Bathroom 1', 'bottom');
+    addRoom(container, length * 0.8, width * 0.2, length * 0.2, width * 0.2, 'Bathroom 2', 'top');
+
+    scaleRooms(container, length, width);
+    return container;
+  }
+
+  // Layout 4: Open plan living (45%), Bedroom 1 (20%), Bedroom 2 (20%), Bathroom (10%), Garage (5%)
+  function createLayout4(length, width) {
+    const container = document.createElement('div');
+    container.className = 'layout';
+
+    addRoom(container, 0, 0, length * 0.45, width, 'Living + Dining', 'right');
+    addRoom(container, length * 0.45, 0, length * 0.3, width * 0.5, 'Bedroom 1', 'left');
+    addRoom(container, length * 0.45, width * 0.5, length * 0.3, width * 0.5, 'Bedroom 2', 'left');
+    addRoom(container, length * 0.75, 0, length * 0.15, width * 0.3, 'Bathroom', 'bottom');
+    addRoom(container, length * 0.75, width * 0.3, length * 0.15, width * 0.7, 'Garage', 'top');
+
+    scaleRooms(container, length, width);
+    return container;
+  }
+
+  // Layout 5: Central corridor with rooms on both sides
+  function createLayout5(length, width) {
+    const container = document.createElement('div');
+    container.className = 'layout';
+
+    addRoom(container, length * 0.4, 0, length * 0.2, width, 'Corridor', 'right');
+    addRoom(container, 0, 0, length * 0.4, width * 0.4, 'Bedroom 1', 'bottom');
+    addRoom(container, 0, width * 0.4, length * 0.4, width * 0.6, 'Bedroom 2', 'bottom');
+    addRoom(container, length * 0.6, 0, length * 0.4, width * 0.4, 'Bedroom 3', 'left');
+    addRoom(container, length * 0.6, width * 0.4, length * 0.2, width * 0.3, 'Bathroom 1', 'top');
+    addRoom(container, length * 0.8, width * 0.4, length * 0.2, width * 0.3, 'Bathroom 2', 'top');
+    addRoom(container, length * 0.4, width * 0.7, length * 0.2, width * 0.3, 'Kitchen', 'top');
+
+    scaleRooms(container, length, width);
+    return container;
+  }
+
+  // Layout 6: L-shaped house with garden area (unoccupied space shown)
+  function createLayout6(length, width) {
+    const container = document.createElement('div');
+    container.className = 'layout';
+
+    addRoom(container, 0, width * 0.5, length * 0.6, width * 0.5, 'Living Room', 'right');
+    addRoom(container, 0, 0, length * 0.4, width * 0.5, 'Kitchen', 'bottom');
+    addRoom(container, length * 0.6, 0, length * 0.4, width * 0.3, 'Bedroom 1', 'left');
+    addRoom(container, length * 0.6, width * 0.3, length * 0.4, width * 0.4, 'Bedroom 2', 'left');
+    addRoom(container, length * 0.6, width * 0.7, length * 0.2, width * 0.1, 'Bathroom', 'left');
+
+    // Garden area
+    const garden = document.createElement('div');
+    garden.className = 'room garden';
+    garden.style.left = `${(length * 0.8 / length) * 100}%`;
+    garden.style.top = `${(width * 0.7 / width) * 100}%`;
+    garden.style.width = `${(length * 0.2 / length) * 100}%`;
+    garden.style.height = `${(width * 0.3 / width) * 100}%`;
+    garden.innerHTML = '<div class="name">Garden Area</div>';
+    container.appendChild(garden);
+
+    scaleRooms(container, length, width);
+    return container;
+  }
+
+  // Add a room div with position and size in feet (to be scaled later)
+  function addRoom(container, x, y, w, h, name, doorPosition = 'bottom') {
+    const room = document.createElement('div');
+    room.className = 'room';
+    room.dataset.x = x;
+    room.dataset.y = y;
+    room.dataset.w = w;
+    room.dataset.h = h;
+
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'name';
+    nameDiv.textContent = name;
+    room.appendChild(nameDiv);
+
+    const sizeDiv = document.createElement('div');
+    sizeDiv.className = 'size';
+    sizeDiv.textContent = `${Math.round(w)}ft × ${Math.round(h)}ft`;
+    room.appendChild(sizeDiv);
+
+    // Add door div
+    const door = document.createElement('div');
+    door.className = 'door ' + doorPosition; // e.g., "door bottom"
+    room.appendChild(door);
+
+    container.appendChild(room);
+  }
+
+  // Scale all rooms to percentage values to make layout responsive
+  function scaleRooms(container, totalLength, totalWidth) {
+    const rooms = container.querySelectorAll('.room');
+    rooms.forEach(room => {
+      const x = Number(room.dataset.x);
+      const y = Number(room.dataset.y);
+      const w = Number(room.dataset.w);
+      const h = Number(room.dataset.h);
+
+      const leftPercent = (x / totalLength) * 100;
+      const topPercent = (y / totalWidth) * 100;
+      const widthPercent = (w / totalLength) * 100;
+      const heightPercent = (h / totalWidth) * 100;
+
+      room.style.left = `${leftPercent}%`;
+      room.style.top = `${topPercent}%`;
+      room.style.width = `${widthPercent}%`;
+      room.style.height = `${heightPercent}%`;
+    });
+  }
+</script>
+
+</body>
+</html>
